@@ -1,0 +1,54 @@
+---
+#Galera_cluster
+- name: Include var for Debian
+  include_vars: Debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: Include var for RedHat
+  include_vars: RedHat.yml
+  when: ansible_os_family == "RedHat"
+
+- name: Installation of Galera Cluster on Ubuntu  
+  include_tasks: Debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: Installaiton of Galera Cluster on CentOS
+  include_tasks: Redhat.yml
+  when: ansible_os_family == "RedHat"
+
+- name: Stop mysql on RedHat
+  service:
+    name: mysqld
+    state: stopped
+  when: ansible_os_family == "RedHat"
+
+- name: Stop mysql on Ubuntu
+  service:
+    name: mysql
+    state: stopped
+  when: ansible_os_family == "Debian"
+
+- name: Bootstrap the cluster
+  shell: /usr/bin/mysqld_bootstrap
+  run_once: true
+
+- name: Start Mysql server for RedHat
+  service:
+    name: mysqld
+    state: started
+  when: ansible_os_family == "RedHat"
+
+- name: Start MySQL service for Debian
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+  when: ansible_os_family == "Debian"
+
+- name: Set root Password
+  mysql_user:
+    name: root
+    host: localhost
+    password: '{{ mysql_root_password }}'
+    state: present
+  run_once: true

@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  author: Abhishek Vishwakarma
+  description: Configure a Galera Cluster with Mysql 5.7
+  company: Opstree Solution
+
+  license: "license (BSD, MIT)"
+
+  min_ansible_version: 2.7
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - precise
+        - trusty
+    - name: Centos
+      versions:
+        - 7
+        - 6
+
+  galaxy_tags: []
+  
+  
+dependencies: []
+

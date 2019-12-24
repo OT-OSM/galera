@@ -1,0 +1,152 @@
+---
+- name: Downloading rpm for MySQL
+  get_url:
+    url: '{{ mysql_rpm }}'
+    dest: /tmp/
+
+- name: Add Galera repository
+  template:
+    src: galera.repo.j2
+    dest: /etc/yum.repos.d/galera.repo
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Installing repo
+  yum:
+    name: /tmp/mysql57-community-release-el7-9.noarch.rpm
+    state: present
+
+- name: Installing MySQL Server
+  yum:
+     name: '{{ item }}'
+     state: latest
+     update_cache: yes
+  loop:
+    - mysql
+    - mysql-server
+
+- name: Enabling MySql
+  command: chkconfig mysqld on
+
+- name: Ensure dependencies are installed.
+  yum:
+    name: '{{ item }}'
+    state: present
+  loop:
+    - galera-3
+    - mysql-wsrep-5.7
+    - lsof
+    - policycoreutils-python
+    - rsync
+    - firewalld
+    - '{{ mysql_python }}'
+    - libselinux-python
+
+- name: Start MySQL to generate temp password
+  service:
+    name: mysqld
+    state: started
+    enabled: yes
+
+- name: Set new Password in RedHat
+  block:
+    - name: Get temporary password
+      shell: cat /var/log/mysqld.log | grep "temporary password" | grep -oE '[^ ]+$'
+      register: tmp_password
+  
+    - name: Detect and properly set root password
+      stat:
+        path: /root/.my.cnf
+      register: root_pass
+
+    - name: Add config file for Password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+      when: root_pass.stat.exists==True
+
+    - name: Set new password from temporary password
+      shell: 'mysql -e "SET PASSWORD = PASSWORD(''{{ mysql_root_password }}'');" --connect-expired-password -uroot -p"{{ tmp_password.stdout }}"'
+      when: root_pass.stat.exists==False
+
+    - name: Copy my.cnf
+      template:
+        src: root_my.cnf.j2
+        dest: /root/.my.cnf
+        force: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Stop MySQL service
+  service:
+    name: mysqld
+    state: stopped
+
+- name: Start firewall service
+  service:
+    name: firewalld
+    state: started
+    
+- name: Allow MySQL service in firewall.
+  firewalld:
+    service: mysql
+    permanent: yes
+    immediate: yes
+    state: enabled
+
+- name: Allow Galera service ports in firewall.
+  firewalld:
+    zone: public
+    port: "{{ item.port }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items:
+    - { port: 4444/tcp }
+    - { port: 4567/tcp }
+    - { port: 4568/tcp }
+
+- name: Enable SELinux
+  selinux:
+    policy: targeted
+    state: permissive
+
+- name: Reboot host and wait for it to restart
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: whoami
+
+- name: Configure SELinux to permissive mode for MySQL
+  seport:
+    ports: "{{ item.port }}"
+    proto: "{{ item.proto}}"
+    setype: mysqld_port_t
+    state: present
+  with_items:
+    - { port: 4444, proto: tcp }
+    - { port: 4567, proto: tcp }
+    - { port: 4567, proto: udp }
+    - { port: 4568, proto: tcp }
+
+- name: Change the mysqld_t domain to permissive
+  selinux_permissive:
+    name: mysqld_t
+    permissive: true
+
+- name: Make backup of my.cnf
+  copy:
+    src: /etc/my.cnf
+    dest: /etc/my.cnf.bak
+    remote_src: yes
+
+- name: Add config file
+  template:
+    src: my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644

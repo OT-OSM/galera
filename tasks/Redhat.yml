@@ -20,7 +20,7 @@
 - name: Installing MySQL Server
   yum:
      name: '{{ item }}'
-     state: latest
+     state: present
      update_cache: yes
   loop:
     - mysql
@@ -54,7 +54,7 @@
     - name: Get temporary password
       shell: cat /var/log/mysqld.log | grep "temporary password" | grep -oE '[^ ]+$'
       register: tmp_password
-  
+
     - name: Detect and properly set root password
       stat:
         path: /root/.my.cnf
@@ -64,11 +64,11 @@
       mysql_user:
         name: root
         password: "{{ mysql_root_password }}"
-      when: root_pass.stat.exists==True
+      when: root_pass.stat.exists
 
     - name: Set new password from temporary password
       shell: 'mysql -e "SET PASSWORD = PASSWORD(''{{ mysql_root_password }}'');" --connect-expired-password -uroot -p"{{ tmp_password.stdout }}"'
-      when: root_pass.stat.exists==False
+      when: not root_pass.stat.exists
 
     - name: Copy my.cnf
       template:
@@ -86,7 +86,7 @@
   service:
     name: firewalld
     state: started
-    
+
 - name: Allow MySQL service in firewall.
   firewalld:
     service: mysql
@@ -123,7 +123,7 @@
 - name: Configure SELinux to permissive mode for MySQL
   seport:
     ports: "{{ item.port }}"
-    proto: "{{ item.proto}}"
+    proto: "{{ item.proto }}"
     setype: mysqld_port_t
     state: present
   with_items:
@@ -142,11 +142,3 @@
     src: /etc/my.cnf
     dest: /etc/my.cnf.bak
     remote_src: yes
-
-- name: Add config file
-  template:
-    src: my.cnf.j2
-    dest: /etc/my.cnf
-    owner: root
-    group: root
-    mode: 0644

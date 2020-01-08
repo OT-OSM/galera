@@ -1,3 +1,14 @@
 ---
 # defaults variables for galera cluster
 galera_cluster_name: galera_cluster
+
+# defaults variables for setup master-slave in galera cluster
+master_slave_replication: false
+ansible_hostfile_master_groupname: master
+ansible_hostfile_slave_groupname: slave
+replica_user: replicant
+replica_pass: Rep@1234
+slave_user: slave
+slave_passwd: Slave@123
+master_ip: "52.15.218.17"
+slave_ip: "18.191.186.0"

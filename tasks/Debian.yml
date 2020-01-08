@@ -24,7 +24,7 @@
      update_cache: yes
 
 - name: Installing MySql dependency
-  apt: 
+  apt:
     name: '{{ item }}'
     update_cache: yes
   loop:
@@ -42,14 +42,6 @@
 
 - name: Remove the MySQL definition loaded in the kernel
   shell: apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
-
-- name: Add config file
-  template:
-    src: galera.cnf.j2
-    dest: /etc/mysql/conf.d/galera.cnf
-    owner: root
-    group: root
-    mode: 0644
 
 - name: Allow port in Firewall
   ufw:

@@ -12,8 +12,8 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - xenial
-        - bionic
-
+        - precise
+        - trusty
     - name: Centos
       versions:
         - 7

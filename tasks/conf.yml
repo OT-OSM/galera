@@ -1,4 +1,7 @@
 ---
+- name: Trigger handlers immediately in case Jenkins was installed
+  meta: flush_handlers
+
 - name: Add config file for Debian
   template:
     src: galera.cnf.j2
@@ -7,6 +10,7 @@
     group: root
     mode: 0644
   when: ansible_os_family == "Debian"
+  notify: Start MySQL service for Debian
 
 - name: Add config file for RedHat
   template:
@@ -16,40 +20,17 @@
     group: root
     mode: 0644
   when: ansible_os_family == "RedHat"
+  notify: Start Mysql server for RedHat
 
-- name: Stop mysql on RedHat
-  service:
-    name: mysqld
-    state: stopped
-  when: ansible_os_family == "RedHat"
+- name: Bootstrap the cluster and Set password
+  block:
+    - name: Bootstrap the cluster
+      shell: /usr/bin/mysqld_bootstrap
+      changed_when: true
 
-- name: Stop mysql on Debian
-  service:
-    name: mysql
-    state: stopped
-  when: ansible_os_family == "Debian"
-
-- name: Bootstrap the cluster
-  shell: /usr/bin/mysqld_bootstrap
+    - name: Set Mysql password
+      include_tasks: mysql_passwd.yml
   run_once: true
 
-- name: Start Mysql server for RedHat
-  service:
-    name: mysqld
-    state: started
-  when: ansible_os_family == "RedHat"
-
-- name: Start MySQL service for Debian
-  service:
-    name: mysql
-    state: started
-    enabled: yes
-  when: ansible_os_family == "Debian"
-
-- name: Set root Password
-  mysql_user:
-    name: root
-    host: localhost
-    password: '{{ mysql_root_password }}'
-    state: present
-  run_once: true
+- name: Trigger handlers immediately in case Jenkins was installed
+  meta: flush_handlers

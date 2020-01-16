@@ -7,6 +7,8 @@
     group: root
     mode: 0644
   when: ansible_os_family == "Debian"
+  run_once: true
+  notify: Restart MySQL service for Debian
 
 - name: Add config file for RedHat
   template:
@@ -16,51 +18,30 @@
     group: root
     mode: 0644
   when: ansible_os_family == "RedHat"
-
-- name: Stop mysql on RedHat
-  service:
-    name: mysqld
-    state: stopped
-  when: ansible_os_family == "RedHat"
-
-- name: Stop mysql on Debian
-  service:
-    name: mysql
-    state: stopped
-  when: ansible_os_family == "Debian"
-
-- name: Bootstrap the cluster
-  shell: /usr/bin/mysqld_bootstrap
   run_once: true
+  notify: Restart Mysql server for RedHat
 
-- name: Start Mysql server for RedHat
-  service:
-    name: mysqld
-    state: started
-  when: ansible_os_family == "RedHat"
-
-- name: Start MySQL service for Debian
-  service:
-    name: mysql
-    state: started
-    enabled: yes
-  when: ansible_os_family == "Debian"
-
-- name: Set root Password
-  mysql_user:
-    name: root
-    host: localhost
-    password: '{{ mysql_root_password }}'
-    state: present
-  run_once: true
+- name: Trigger handlers immediately in case Jenkins was installed
+  meta: flush_handlers
 
 - name: create replication user and provide slave privileges
   mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
     name: "{{ replica_user }}"
     host: "{{ slave_ip }}"
     password: "{{ replica_pass }}"
     state: present
     priv: '*.*:REPLICATION SLAVE'
+  run_once: true
+
+- name: Dump multiple databases
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: dump
+    name: all
+    target:  /tmp/masterdump.sql
   run_once: true
 
 - name: Dump database to mysqldump.sql
@@ -76,6 +57,9 @@
 
 - name: Create user for slave
   mysql_user:
+    login_user: root
+    login_password: '{{ mysql_root_password }}'
+    login_host: localhost
     name: '{{ slave_user }}'
     host: '%'
     password: '{{ slave_passwd }}'

@@ -1,2 +1,40 @@
 ---
 # handlers file for galera
+- name: Stop mysql on RedHat
+  service:
+    name: mysqld
+    state: stopped
+  when: ansible_os_family == "RedHat"
+
+- name: Stop mysql on Debian
+  service:
+    name: mysql
+    state: stopped
+  when: ansible_os_family == "Debian"
+
+- name: Start Mysql server for RedHat
+  service:
+    name: mysqld
+    state: started
+  when: ansible_os_family == "RedHat"
+  listen: "Restart services"
+
+- name: Start MySQL service for Debian
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+  when: ansible_os_family == "Debian"
+  listen: "Restart services"
+
+- name: Restart Mysql server for RedHat
+  service:
+    name: mysqld
+    state: restarted
+  when: ansible_os_family == "RedHat"
+
+- name: Restart MySQL service for Debian
+  service:
+    name: mysql
+    state: restarted
+    enabled: yes

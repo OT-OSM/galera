@@ -8,10 +8,10 @@ wsrep_on=ON
 wsrep_provider=/usr/lib/galera/libgalera_smm.so
 # Galera Cluster Configuration
 wsrep_cluster_name="{{ galera_cluster_name }}"
-wsrep_cluster_address="gcomm://{% for host in groups[ansible_hostfile_master_groupname] %}{{hostvars[host]['ansible_default_ipv4']['address']}}{%- if not loop.last %},{% endif %}{% endfor %}"
+wsrep_cluster_address="gcomm://{% for host in play_hosts %}{{hostvars[host]['ansible_default_ipv4']['address']}}{%- if not loop.last %},{% endif %}{% endfor %}"
 # Galera Synchronization Configuration
 wsrep_sst_method=rsync
-
+wsrep_sst_donor="{{ donar_node_name }}"
 # Galera Node Configuration
 wsrep_node_address="{{ ansible_default_ipv4.address }}"
 wsrep_node_name="{{ node_name }}"

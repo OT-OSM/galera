@@ -1,9 +1,4 @@
 ---
-- name: Downloading rpm for MySQL
-  get_url:
-    url: '{{ mysql_rpm }}'
-    dest: /tmp/
-
 - name: Add Galera repository
   template:
     src: galera.repo.j2
@@ -11,23 +6,6 @@
     owner: root
     group: root
     mode: 0644
-
-- name: Installing repo
-  yum:
-    name: /tmp/mysql57-community-release-el7-9.noarch.rpm
-    state: present
-
-- name: Installing MySQL Server
-  yum:
-     name: '{{ item }}'
-     state: present
-     update_cache: yes
-  loop:
-    - mysql
-    - mysql-server
-
-- name: Enabling MySql
-  command: chkconfig mysqld on
 
 - name: Ensure dependencies are installed.
   yum:
@@ -42,45 +20,6 @@
     - firewalld
     - '{{ mysql_python }}'
     - libselinux-python
-
-- name: Start MySQL to generate temp password
-  service:
-    name: mysqld
-    state: started
-    enabled: yes
-
-- name: Set new Password in RedHat
-  block:
-    - name: Get temporary password
-      shell: cat /var/log/mysqld.log | grep "temporary password" | grep -oE '[^ ]+$'
-      register: tmp_password
-
-    - name: Detect and properly set root password
-      stat:
-        path: /root/.my.cnf
-      register: root_pass
-
-    - name: Add config file for Password
-      mysql_user:
-        name: root
-        password: "{{ mysql_root_password }}"
-      when: root_pass.stat.exists
-
-    - name: Set new password from temporary password
-      shell: 'mysql -e "SET PASSWORD = PASSWORD(''{{ mysql_root_password }}'');" --connect-expired-password -uroot -p"{{ tmp_password.stdout }}"'
-      when: not root_pass.stat.exists
-
-    - name: Copy my.cnf
-      template:
-        src: root_my.cnf.j2
-        dest: /root/.my.cnf
-        force: yes
-  when: ansible_os_family == "RedHat"
-
-- name: Stop MySQL service
-  service:
-    name: mysqld
-    state: stopped
 
 - name: Start firewall service
   service:
@@ -110,6 +49,7 @@
   selinux:
     policy: targeted
     state: permissive
+  register: selinux_state
 
 - name: Reboot host and wait for it to restart
   reboot:
@@ -119,6 +59,7 @@
     pre_reboot_delay: 0
     post_reboot_delay: 30
     test_command: whoami
+  when: selinux_state.reboot_required
 
 - name: Configure SELinux to permissive mode for MySQL
   seport:
@@ -142,3 +83,4 @@
     src: /etc/my.cnf
     dest: /etc/my.cnf.bak
     remote_src: yes
+  notify: Stop mysql on RedHat

@@ -1,23 +1,4 @@
 ---
-- name: Stop mysql on RedHat
-  service:
-    name: mysqld
-    state: restarted
-  when: ansible_os_family == "RedHat"
-
-- name: Stop mysql on Debian
-  service:
-    name: mysql
-    state: restarted
-  when: ansible_os_family == "Debian"
-
-- name: Set root Password
-  mysql_user:
-    name: root
-    host: localhost
-    password: '{{ mysql_root_password }}'
-    state: present
-
 - name: Add config file for Debian
   template:
     src: slave_galera.cnf.j2
@@ -47,6 +28,10 @@
     name: mysql
     state: restarted
   when: ansible_os_family == "Debian"
+
+
+- name: Set Mysql password for slave
+  include_tasks: mysql_passwd.yml
 
 - name: Stop Slave
   mysql_replication:

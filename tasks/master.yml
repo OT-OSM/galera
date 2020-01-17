@@ -44,10 +44,6 @@
     target:  /tmp/masterdump.sql
   run_once: true
 
-- name: Dump database to mysqldump.sql
-  shell: mysqldump -h localhost -u root  --all-databases --master-data > /tmp/masterdump.sql
-  run_once: true
-
 - name: copy mysqldump to localhost
   fetch:
     src: /tmp/masterdump.sql

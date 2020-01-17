@@ -30,6 +30,11 @@
     - galera-arbitrator-3
     - rsync
 
+- name: Check usr.sbin.mysqld link
+  stat:
+    path: /etc/apparmor.d/disable/usr.sbin.mysqld
+  register: sym
+
 - name: Disable AppArmor
   file:
     src: /etc/apparmor.d/usr.sbin.mysqld
@@ -37,8 +42,9 @@
     state: link
 
 - name: Remove the MySQL definition loaded in the kernel
-  shell: apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
-  notify: Stop mysql on Debian
+  command: apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+  changed_when: true
+  when: (ansible_distribution_major_version == "18") and (sym.stat.islnk is not defined)
 
 - name: Allow port in Firewall
   ufw:
@@ -51,3 +57,4 @@
     - { port: 4567, proto: tcp }
     - { port: 4568, proto: tcp }
     - { port: 4567, proto: udp }
+  notify: Stop mysql on Debian

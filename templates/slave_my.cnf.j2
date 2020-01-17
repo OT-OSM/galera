@@ -4,7 +4,7 @@ socket=/var/lib/mysql/mysql.sock
 
 # Galera Cluster Configuration for slave
 gtid_mode=ON
-bind-address={{ ansible_default_ipv4.address }}
+bind-address=0.0.0.0
 read_only
 log_slave_updates=1
 enforce_gtid_consistency

@@ -15,5 +15,5 @@ replica_user: replicant
 replica_pass: Rep@1234
 slave_user: slave
 slave_passwd: Slave@123
-master_ip: "18.188.148.140"
-slave_ip: "52.15.143.197"
+master_ip: "3.17.162.233"
+slave_ip: "3.82.54.38"

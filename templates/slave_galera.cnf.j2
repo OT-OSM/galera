@@ -2,7 +2,7 @@
 binlog_format=ROW
 default-storage-engine=innodb
 innodb_autoinc_lock_mode=2
-bind-address={{ ansible_default_ipv4.address }}
+bind-address=0.0.0.0
 
 # Mysql Slave Configuration
 gtid_mode=ON

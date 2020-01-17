@@ -77,10 +77,10 @@
   selinux_permissive:
     name: mysqld_t
     permissive: true
+  notify: Stop mysql on RedHat
 
 - name: Make backup of my.cnf
   copy:
     src: /etc/my.cnf
     dest: /etc/my.cnf.bak
     remote_src: yes
-  notify: Stop mysql on RedHat

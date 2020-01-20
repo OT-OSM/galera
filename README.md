@@ -1,10 +1,24 @@
 Galera
 =========
-Galera role to install and configure a Galera Cluster with Mysql 5.7 on Debian and Redhat servers.
+An Ansible role to install and configure a Galera Cluster with Mysql 5.7 on Debian and Redhat servers.
 
-Requirements
+Version History
+---------------
+
+|**Date**| **Version**| **Description**| **Changed By** |
+|----------|---------|---------------|-----------------|
+|**June '15** | v.1.0 | Initial Draft | Sudipt Sharma |
+
+Supported OS
 ------------
-Define Cluster name for each host using variable <b>'node_name'</b> & <b> 'server _id' </b> in inventory file of Ansible
+  * CentOS:7
+  * Ubuntu:bionic
+  * Ubuntu:xenial
+
+Dependencies
+------------
+* Define Cluster name for each host using variable <b>'node_name'</b> & <b> 'server _id' </b> in inventory file of Ansible
+* Mysql Password must contain special and numeric characters and having minimum length 8  
 
 Role Variables
 --------------
@@ -14,7 +28,7 @@ We are using below mention default variables in this role.
 |----------|---------|---------------|
 | galera_cluster_name | galera_cluster | Cluster name |
 | master_slave_replication | false | Set true if read replica required |
-| mysql_root_password | r@@t123 | Password for MariaDb root account |
+| mysql_root_password | r@@t123 | Password for Mysql root account |
 
 We are using below mention specific variables to create read replica in this role.
 
@@ -26,8 +40,6 @@ We are using below mention specific variables to create read replica in this rol
 | replica_pass | Rep@1234 | Password of replication |
 | slave_user | slave | Username of slave user |
 | slave_passwd | Slave@123 | Password of slave user |
-| master_ip | 192.168.1.198 | IP-address of master server |
-| slave_ip | 192.168.1.210 | IP-address of slave server |
 
 We are using below mention variables to setup mysql and galera in this role.
 
@@ -70,7 +82,7 @@ An inventory should look like this for galera cluster to add new node:-
 Here is an example playbook:-
 ```yml
 ---
-- hosts: galerahost
+- hosts: master
   roles:
     - role: osm_galera
       become: yes
@@ -81,5 +93,12 @@ For using this role you have to execute playbook only
 ```shell
 ansible-playbook -i hosts site.yml
 ```
+Future Proposed Changes
+-----------------------
+
+References
+----------
+- **[database](https://galeracluster.com/)**
+
 ## Author
 **[Abhishek Vishwakarma](mailto:abhishek.vishwakarma@opstree.com)*

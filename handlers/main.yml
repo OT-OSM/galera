@@ -32,9 +32,14 @@
     name: mysqld
     state: restarted
   when: ansible_os_family == "RedHat"
+  with_items: "{{ ansible_play_batch }}"
+  delegate_to: "{{ item }}"
 
 - name: Restart MySQL service for Debian
   service:
     name: mysql
     state: restarted
     enabled: yes
+  when: ansible_os_family == "Debian"
+  with_items: "{{ ansible_play_batch }}"
+  delegate_to: "{{ item }}"

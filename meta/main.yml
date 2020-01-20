@@ -12,14 +12,12 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - xenial
-        - precise
-        - trusty
+        - bionic
     - name: Centos
       versions:
         - 7
-        - 6
 
-  galaxy_tags: []
-
+  galaxy_tags:
+    - galera
 
 dependencies: []

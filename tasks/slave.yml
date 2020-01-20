@@ -44,7 +44,7 @@
     src: /tmp/masterdump.sql
     dest: /tmp/masterdump.sql
 
-- name: restore
+- name: Import db on slave
   mysql_db:
     name: replication
     state: import

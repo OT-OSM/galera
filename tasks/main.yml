@@ -27,7 +27,7 @@
   block:
     - name: Setup master
       include_tasks: master.yml
-      when: (node_type is defined) and (node_type == "master")
+      when: (inventory_hostname in groups[ansible_hostfile_master_groupname])
 
     - name: Setup slave
       include_tasks: slave.yml

@@ -23,7 +23,6 @@
     group: root
     mode: 0644
   when: ansible_os_family == "Debian"
-  notify: Restart MySQL service for Debian
 
 - name: Add config file for RedHat
   template:
@@ -33,5 +32,16 @@
     group: root
     mode: 0644
   when: ansible_os_family == "RedHat"
-  notify: Restart Mysql server for RedHat
 
+- name: Restart Mysql server for RedHat
+  service:
+    name: mysqld
+    state: restarted
+  when: ansible_os_family == "RedHat"
+
+- name: Restart MySQL service for Debian
+  service:
+    name: mysql
+    state: restarted
+    enabled: yes
+    when: ansible_os_family == "Debian"

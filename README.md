@@ -62,13 +62,17 @@ An inventory should look like this for galera cluster:-
 ```
 An inventory should look like this for galera cluster with read replica:-
 ```ini
+[all:vars]
+master_ip=192.168.4.154
+slave_ip=192.168.1.210
+
 [master]                 
 192.168.1.198    ansible_user=ubuntu    node_name=Node1  server_id=1
 192.168.2.208    ansible_user=centos    node_name=Node2  server_id=2
 192.168.3.201    ansible_user=opstree   node_name=Node3  server_id=3
-192.168.4.154    ansible_user=ubuntu    node_name=Node1  server_id=4  node_type=master  slave_ip=192.168.1.210
+192.168.4.154    ansible_user=ubuntu    node_name=Node4  server_id=4 
 [slave]
-192.168.1.210    ansible_user=ubuntu    server_id=5   master_ip=192.168.4.154    
+192.168.1.210    ansible_user=ubuntu    server_id=5 
 ```
 An inventory should look like this for galera cluster to add new node:-
 ```ini

@@ -65,6 +65,7 @@ An inventory should look like this for galera cluster to add new node:-
 192.168.2.208    ansible_user=centos    node_name=Node2
 192.168.3.201    ansible_user=opstree   node_name=Node3
 192.168.4.154    ansible_user=ubuntu    node_name=Node4  donar_node_name=Node1
+```
 ## Example Playbook
 Here is an example playbook:-
 ```yml

@@ -1,0 +1,3 @@
+---
+# vars file for galera cluster
+mysql_root_password: "R@@t12345"

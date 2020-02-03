@@ -1,0 +1,86 @@
+---
+- name: Add Galera repository
+  template:
+    src: galera.repo.j2
+    dest: /etc/yum.repos.d/galera.repo
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Ensure dependencies are installed.
+  yum:
+    name: '{{ item }}'
+    state: present
+  loop:
+    - galera-3
+    - mysql-wsrep-5.7
+    - lsof
+    - policycoreutils-python
+    - rsync
+    - firewalld
+    - '{{ mysql_python }}'
+    - libselinux-python
+
+- name: Start firewall service
+  service:
+    name: firewalld
+    state: started
+
+- name: Allow MySQL service in firewall.
+  firewalld:
+    service: mysql
+    permanent: yes
+    immediate: yes
+    state: enabled
+
+- name: Allow Galera service ports in firewall.
+  firewalld:
+    zone: public
+    port: "{{ item.port }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items:
+    - { port: 4444/tcp }
+    - { port: 4567/tcp }
+    - { port: 4568/tcp }
+
+- name: Enable SELinux
+  selinux:
+    policy: targeted
+    state: permissive
+  register: selinux_state
+
+- name: Reboot host and wait for it to restart
+  reboot:
+    msg: "Reboot initiated by Ansible"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+    test_command: whoami
+  when: selinux_state.reboot_required
+
+- name: Configure SELinux to permissive mode for MySQL
+  seport:
+    ports: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    setype: mysqld_port_t
+    state: present
+  with_items:
+    - { port: 4444, proto: tcp }
+    - { port: 4567, proto: tcp }
+    - { port: 4567, proto: udp }
+    - { port: 4568, proto: tcp }
+
+- name: Change the mysqld_t domain to permissive
+  selinux_permissive:
+    name: mysqld_t
+    permissive: true
+  notify: Stop mysql on RedHat
+
+- name: Make backup of my.cnf
+  copy:
+    src: /etc/my.cnf
+    dest: /etc/my.cnf.bak
+    remote_src: yes

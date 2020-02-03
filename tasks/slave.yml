@@ -1,0 +1,69 @@
+---
+- name: Add config file for Debian
+  template:
+    src: slave_galera.cnf.j2
+    dest: /etc/mysql/conf.d/galera.cnf
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == "Debian"
+
+- name: Add config file for RedHat
+  template:
+    src: slave_my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == "RedHat"
+
+- name: Restart mysql on RedHat
+  service:
+    name: mysqld
+    state: restarted
+  when: ansible_os_family == "RedHat"
+
+- name: Restart mysql on Debian
+  service:
+    name: mysql
+    state: restarted
+  when: ansible_os_family == "Debian"
+
+
+- name: Set Mysql password for slave
+  include_tasks: mysql_passwd.yml
+
+- name: Stop Slave
+  mysql_replication:
+     mode: stopslave
+     login_user: root
+     login_password: '{{ mysql_root_password }}'
+
+- name: Copy mysqldump from local to slave
+  copy:
+    src: /tmp/masterdump.sql
+    dest: /tmp/masterdump.sql
+
+- name: Import db on slave
+  mysql_db:
+    name: replication
+    state: import
+    target: /tmp/masterdump.sql
+    login_user: root
+    login_password: '{{ mysql_root_password }}'
+
+- name: Change Master on Slave
+  mysql_replication:
+    mode: changemaster
+    login_user: root
+    login_password: '{{ mysql_root_password }}'
+    master_host: "{{ master_ip }}"
+    master_user: "{{ replica_user }}"
+    master_password: "{{ replica_pass }}"
+    master_auto_position: yes
+
+- name: Start Slave
+  mysql_replication:
+     mode: startslave
+     login_user: root
+     login_password: '{{ mysql_root_password }}'

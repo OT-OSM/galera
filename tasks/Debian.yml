@@ -1,0 +1,60 @@
+---
+- name: Add an apt key by id from keyserver
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: BC19DDBA
+
+- name: Add the repository
+  apt_repository:
+    repo: '{{ item }}'
+    state: present
+    update_cache: yes
+  with_items:
+    - '{{ mysql_wsrep_repo }}'
+    - '{{ galera_repo }}'
+
+- name: Installing MySql Server
+  apt:
+     name: mysql-server
+     state: present
+     update_cache: yes
+
+- name: Installing MySql dependency
+  apt:
+    name: '{{ item }}'
+    update_cache: yes
+  loop:
+    - python-mysqldb
+    - galera-3
+    - mysql-wsrep-5.7
+    - galera-arbitrator-3
+    - rsync
+
+- name: Check usr.sbin.mysqld link
+  stat:
+    path: /etc/apparmor.d/disable/usr.sbin.mysqld
+  register: sym
+
+- name: Disable AppArmor
+  file:
+    src: /etc/apparmor.d/usr.sbin.mysqld
+    dest: /etc/apparmor.d/disable/usr.sbin.mysqld
+    state: link
+
+- name: Remove the MySQL definition loaded in the kernel
+  command: apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+  changed_when: true
+  when: (ansible_distribution_major_version == "18") and (sym.stat.islnk is not defined)
+
+- name: Allow port in Firewall
+  ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  with_items:
+    - { port: 3306, proto: tcp }
+    - { port: 4444, proto: tcp }
+    - { port: 4567, proto: tcp }
+    - { port: 4568, proto: tcp }
+    - { port: 4567, proto: udp }
+  notify: Stop mysql on Debian

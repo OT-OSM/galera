@@ -1,0 +1,30 @@
+[mysqld]
+datadir=/var/lib/mysql
+socket=/var/lib/mysql/mysql.sock
+user=mysql
+binlog_format=ROW
+bind-address=0.0.0.0
+default_storage_engine=innodb
+innodb_autoinc_lock_mode=2
+innodb_flush_log_at_trx_commit=0
+innodb_buffer_pool_size=122M
+wsrep_provider=/usr/lib64/galera-3/libgalera_smm.so
+wsrep_provider_options="gcache.size=300M; gcache.page_size=300M"
+wsrep_cluster_name="{{ galera_cluster_name }}"
+wsrep_cluster_address="gcomm://{% for host in groups[ansible_hostfile_master_groupname] %}{{hostvars[host]['ansible_default_ipv4']['address']}}{%- if not loop.last %},{% endif %}{% endfor %}"
+wsrep_sst_method=rsync
+
+# Galera Cluster Configuration for master
+gtid_mode=ON
+log_bin=binlog
+log_slave_updates=1
+enforce_gtid_consistency
+expire_logs_days=7
+server_id={{ server_id }}
+
+
+wsrep_node_address={{ ansible_default_ipv4.address }}
+wsrep_node_name="{{ node_name }}"
+[mysql_safe]
+log-error=/var/log/mysqld.log
+pid-file=/var/run/mysqld/mysqld.pid

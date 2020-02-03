@@ -1,0 +1,36 @@
+---
+- name: Set new Password in RedHat
+  block:
+    - name: Get temporary password
+      shell: cat /var/log/mysqld.log | grep "temporary password" | grep -oE '[^ ]+$'
+      register: tmp_password
+
+    - name: Detect and properly set root password
+      stat:
+        path: /root/.my.cnf
+      register: root_pass
+
+    - name: Add config file for Password
+      mysql_user:
+        name: root
+        password: "{{ mysql_root_password }}"
+      when: root_pass.stat.exists
+
+    - name: Set new password from temporary password
+      shell: 'mysql -e "SET PASSWORD = PASSWORD(''{{ mysql_root_password }}'');" --connect-expired-password -uroot -p"{{ tmp_password.stdout }}"'
+      when: not root_pass.stat.exists
+
+    - name: Copy my.cnf
+      template:
+        src: root_my.cnf.j2
+        dest: /root/.my.cnf
+        force: yes
+  when: ansible_os_family == "RedHat"
+
+- name: Set root Password for Debian
+  mysql_user:
+    name: root
+    host: localhost
+    password: '{{ mysql_root_password }}'
+    state: present
+  when: ansible_os_family == "Debian"

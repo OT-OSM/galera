@@ -1,0 +1,62 @@
+---
+- name: Add config file for Debian
+  template:
+    src: master_galera.cnf.j2
+    dest: /etc/mysql/conf.d/galera.cnf
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == "Debian"
+  notify: Restart MySQL service for Debian
+
+- name: Add config file for RedHat
+  template:
+    src: master_my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == "RedHat"
+  notify: Restart Mysql server for RedHat
+
+- name: Trigger handlers
+  meta: flush_handlers
+
+- name: create replication user and provide slave privileges
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ replica_user }}"
+    host: "{{ slave_ip }}"
+    password: "{{ replica_pass }}"
+    state: present
+    priv: '*.*:REPLICATION SLAVE'
+  run_once: true
+
+- name: Dump multiple databases
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: dump
+    name: all
+    target:  /tmp/masterdump.sql
+  run_once: true
+
+- name: copy mysqldump to localhost
+  fetch:
+    src: /tmp/masterdump.sql
+    dest: /tmp/
+    flat: yes
+  run_once: true
+
+- name: Create user for slave
+  mysql_user:
+    login_user: root
+    login_password: '{{ mysql_root_password }}'
+    login_host: localhost
+    name: '{{ slave_user }}'
+    host: '%'
+    password: '{{ slave_passwd }}'
+    state: present
+    priv: '*.*:SELECT'
+  run_once: true

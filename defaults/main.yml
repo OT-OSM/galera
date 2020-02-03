@@ -1,0 +1,17 @@
+---
+# Set true to create galera cluster or add new node added
+add_node: true
+
+# defaults variables for galera cluster
+galera_cluster_name: galera_cluster
+
+# Set true to create galera cluster with read replication
+master_slave_replication: false
+
+# defaults variables for setup master-slave in galera cluster
+ansible_hostfile_master_groupname: master
+ansible_hostfile_slave_groupname: slave
+replica_user: replicant
+replica_pass: Rep@1234
+slave_user: slave
+slave_passwd: Slave@123

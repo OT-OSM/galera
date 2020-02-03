@@ -1,0 +1,44 @@
+---
+##################
+# Galera_cluster #
+##################
+- name: Gather OS specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+
+- name: Installation of Galera Cluster on Ubuntu
+  include_tasks: Debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: Installation of Galera Cluster on CentOS
+  include_tasks: Redhat.yml
+  when: ansible_os_family == "RedHat"
+
+- name: Configure Galera cluster
+  include_tasks: conf.yml
+  when: (not add_node) and (inventory_hostname in groups[ansible_hostfile_master_groupname])
+
+########################################
+# Configuration for Master-Slave setup #
+########################################
+- name: Setup Master slave in galera cluster
+  block:
+    - name: Setup master
+      include_tasks: master.yml
+      when: (inventory_hostname in groups[ansible_hostfile_master_groupname])
+
+    - name: Setup slave
+      include_tasks: slave.yml
+      when: (inventory_hostname in groups[ansible_hostfile_slave_groupname])
+  when: (master_slave_replication) and (not add_node)
+
+################################
+# Add new node in Galera Cluster
+################################
+- name: Add new in Galera Cluster
+  block:
+    - name: Configure new node
+      include_tasks: add_node.yml
+  when: (add_node) and (donar_node_name is defined)

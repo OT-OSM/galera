@@ -1,0 +1,47 @@
+---
+- name: Start Mysql server for RedHat
+  service:
+    name: mysqld
+    state: started
+  when: ansible_os_family == "RedHat"
+
+- name: Start MySQL service for Debian
+  service:
+    name: mysql
+    state: started
+    enabled: yes
+  when: ansible_os_family == "Debian"
+
+- name: Set Mysql password
+  include_tasks: mysql_passwd.yml
+
+- name: Add config file for Debian
+  template:
+    src: add_node_galera.cnf.j2
+    dest: /etc/mysql/conf.d/galera.cnf
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == "Debian"
+
+- name: Add config file for RedHat
+  template:
+    src: add_node_my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+  when: ansible_os_family == "RedHat"
+
+- name: Restart Mysql server for RedHat
+  service:
+    name: mysqld
+    state: restarted
+  when: ansible_os_family == "RedHat"
+
+- name: Restart MySQL service for Debian
+  service:
+    name: mysql
+    state: restarted
+    enabled: yes
+    when: ansible_os_family == "Debian"

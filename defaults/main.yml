@@ -1,6 +1,6 @@
 ---
-# Set true to create galera cluster or add new node added
-add_node: true
+# Set true to create to add new node in cluster
+add_node: false
 
 # defaults variables for galera cluster
 galera_cluster_name: galera_cluster

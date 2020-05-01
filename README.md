@@ -1,5 +1,10 @@
 Galera
 =========
+[![Opstree Solutions][opstree_avatar]][opstree_homepage]<br/>[Opstree Solutions][opstree_homepage] 
+
+  [opstree_homepage]: https://opstree.github.io/
+  [opstree_avatar]: https://img.cloudposse.com/150x150/https://github.com/opstree.png
+
 An Ansible role to install and configure a Galera Cluster with Mysql 5.7 on Debian and Redhat servers.
 
 Version History
@@ -7,7 +12,7 @@ Version History
 
 |**Date**| **Version**| **Description**| **Changed By** |
 |----------|---------|---------------|-----------------|
-|**June '15** | v.1.0 | Initial Draft | Sudipt Sharma |
+|**April '30** | v.1.0 | Initial Draft | Abhishek Vishwakarma |
 
 Supported OS
 ------------
@@ -29,6 +34,7 @@ We are using below mention default variables in this role.
 | galera_cluster_name | galera_cluster | Cluster name |
 | master_slave_replication | false | Set true if read replica required |
 | mysql_root_password | r@@t123 | Password for Mysql root account |
+| add_node | false | Set true to create to add new node in cluster |
 
 We are using below mention specific variables to create read replica in this role.
 
@@ -43,13 +49,14 @@ We are using below mention specific variables to create read replica in this rol
 
 We are using below mention variables to setup mysql and galera in this role.
 
-|**Variables**| **Default Values**|**Description**|
+|**Variables**| **Description**|
 |----------|---------|---------------|
-| mysql_wsrep_url | http://releases.galeracluster.com/mysql-wsrep-5.7/ubuntu | Mysql url for Ubuntu server |
-| mysql_wsrep_repo | deb {{ mysql_wsrep_url }} {{ ansible_lsb.codename }} main | Mysql repo location for Ubuntu server |
-| galera_url | http://releases.galeracluster.com/galera-3/ubuntu | Galera url for Ubuntu server |
-| galera_repo | deb {{ galera_url }} {{ ansible_lsb.codename }} main | Galera repo location for Ubuntu server |
-| mysql_python | http://mirror.centos.org/centos/7/os/x86_64/Packages/MySQL-python-1.2.5-1.el7.x86_64.rpm | Mysql python url for Centos server |
+| mysql_wsrep_url | Mysql url for Ubuntu server |
+| mysql_wsrep_repo | Mysql repo location for Ubuntu server |
+| galera_url | Galera url for Ubuntu server |
+| galera_repo | Galera repo location for Ubuntu server |
+| mysql_python | Mysql python url for Centos server |
+| mysql_rpm | Mysql rpm location for Centos server |
 
 Inventory
 ----------

@@ -24,11 +24,18 @@
     name: '{{ item }}'
     update_cache: true
   loop:
+    - python3-pip
     - python-mysqldb
     - galera-3
     - mysql-wsrep-5.7
     - galera-arbitrator-3
     - rsync
+
+- name: Make sure pymysql is present
+  pip:
+    name: pymysql
+    executable: pip3
+    state: present
 
 - name: Check usr.sbin.mysqld link
   stat:

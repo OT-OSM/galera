@@ -29,16 +29,16 @@
 - name: Allow MySQL service in firewall.
   firewalld:
     service: mysql
-    permanent: yes
-    immediate: yes
+    permanent: true
+    immediate: true
     state: enabled
 
 - name: Allow Galera service ports in firewall.
   firewalld:
     zone: public
     port: "{{ item.port }}"
-    permanent: yes
-    immediate: yes
+    permanent: true
+    immediate: true
     state: enabled
   with_items:
     - { port: 4444/tcp }
@@ -83,4 +83,4 @@
   copy:
     src: /etc/my.cnf
     dest: /etc/my.cnf.bak
-    remote_src: yes
+    remote_src: true

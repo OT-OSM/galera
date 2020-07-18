@@ -24,7 +24,7 @@
       template:
         src: root_my.cnf.j2
         dest: /root/.my.cnf
-        force: yes
+        force: true
   when: ansible_os_family == "RedHat"
 
 - name: Set root Password for Debian

@@ -8,27 +8,34 @@
   apt_repository:
     repo: '{{ item }}'
     state: present
-    update_cache: yes
+    update_cache: true
   with_items:
     - '{{ mysql_wsrep_repo }}'
     - '{{ galera_repo }}'
 
 - name: Installing MySql Server
   apt:
-     name: mysql-server
-     state: present
-     update_cache: yes
+    name: mysql-server
+    state: present
+    update_cache: true
 
 - name: Installing MySql dependency
   apt:
     name: '{{ item }}'
-    update_cache: yes
+    update_cache: true
   loop:
+    - python3-pip
     - python-mysqldb
     - galera-3
     - mysql-wsrep-5.7
     - galera-arbitrator-3
     - rsync
+
+- name: Make sure pymysql is present
+  pip:
+    name: pymysql
+    executable: pip3
+    state: present
 
 - name: Check usr.sbin.mysqld link
   stat:

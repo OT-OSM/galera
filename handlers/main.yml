@@ -23,7 +23,7 @@
   service:
     name: mysql
     state: started
-    enabled: yes
+    enabled: true
   when: ansible_os_family == "Debian"
   listen: "Restart services"
 
@@ -39,7 +39,7 @@
   service:
     name: mysql
     state: restarted
-    enabled: yes
+    enabled: true
   when: ansible_os_family == "Debian"
   with_items: "{{ ansible_play_batch }}"
   delegate_to: "{{ item }}"

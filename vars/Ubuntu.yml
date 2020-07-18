@@ -3,5 +3,5 @@ mysql_url: http://repo.mysql.com/apt/ubuntu
 mysql_repo: 'deb {{ mysql_url }} {{ ansible_lsb.codename }} mysql-5.7'
 mysql_wsrep_url: http://releases.galeracluster.com/mysql-wsrep-5.7/ubuntu
 mysql_wsrep_repo: 'deb {{ mysql_wsrep_url }} {{ ansible_lsb.codename }} main'
-galera_url: http://releases.galeracluster.com/galera-3/ubuntu 
+galera_url: http://releases.galeracluster.com/galera-3/ubuntu
 galera_repo: 'deb {{ galera_url }} {{ ansible_lsb.codename }} main'

@@ -8,21 +8,21 @@
   apt_repository:
     repo: '{{ item }}'
     state: present
-    update_cache: yes
+    update_cache: true
   with_items:
     - '{{ mysql_wsrep_repo }}'
     - '{{ galera_repo }}'
 
 - name: Installing MySql Server
   apt:
-     name: mysql-server
-     state: present
-     update_cache: yes
+    name: mysql-server
+    state: present
+    update_cache: true
 
 - name: Installing MySql dependency
   apt:
     name: '{{ item }}'
-    update_cache: yes
+    update_cache: true
   loop:
     - python-mysqldb
     - galera-3

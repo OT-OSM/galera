@@ -35,9 +35,9 @@
 
 - name: Stop Slave
   mysql_replication:
-     mode: stopslave
-     login_user: root
-     login_password: '{{ mysql_root_password }}'
+    mode: stopslave
+    login_user: root
+    login_password: '{{ mysql_root_password }}'
 
 - name: Copy mysqldump from local to slave
   copy:
@@ -60,10 +60,10 @@
     master_host: "{{ master_ip }}"
     master_user: "{{ replica_user }}"
     master_password: "{{ replica_pass }}"
-    master_auto_position: yes
+    master_auto_position: true
 
 - name: Start Slave
   mysql_replication:
-     mode: startslave
-     login_user: root
-     login_password: '{{ mysql_root_password }}'
+    mode: startslave
+    login_user: root
+    login_password: '{{ mysql_root_password }}'

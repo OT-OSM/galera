@@ -39,14 +39,14 @@
     login_password: "{{ mysql_root_password }}"
     state: dump
     name: all
-    target:  /tmp/masterdump.sql
+    target: /tmp/masterdump.sql
   run_once: true
 
 - name: copy mysqldump to localhost
   fetch:
     src: /tmp/masterdump.sql
     dest: /tmp/
-    flat: yes
+    flat: true
   run_once: true
 
 - name: Create user for slave

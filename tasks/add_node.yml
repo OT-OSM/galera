@@ -9,7 +9,7 @@
   service:
     name: mysql
     state: started
-    enabled: yes
+    enabled: true
   when: ansible_os_family == "Debian"
 
 - name: Set Mysql password
@@ -43,5 +43,5 @@
   service:
     name: mysql
     state: restarted
-    enabled: yes
+    enabled: true
     when: ansible_os_family == "Debian"

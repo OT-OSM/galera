@@ -34,7 +34,7 @@ We are using below mention default variables in this role.
 | galera_cluster_name | galera_cluster | Cluster name |
 | master_slave_replication | false | Set true if read replica required |
 | mysql_root_password | r@@t123 | Password for Mysql root account |
-| add_node | false | Set true to create to add new node in cluster |
+| add_node | false | Set true to add new node in cluster |
 
 We are using below mention specific variables to create read replica in this role.
 
@@ -50,7 +50,7 @@ We are using below mention specific variables to create read replica in this rol
 We are using below mention variables to setup mysql and galera in this role.
 
 |**Variables**| **Description**|
-|----------|---------|---------------|
+|----------|---------|
 | mysql_wsrep_url | Mysql url for Ubuntu server |
 | mysql_wsrep_repo | Mysql repo location for Ubuntu server |
 | galera_url | Galera url for Ubuntu server |
@@ -81,7 +81,7 @@ slave_ip=192.168.1.210
 [slave]
 192.168.1.210    ansible_user=ubuntu    server_id=5 
 ```
-An inventory should look like this for galera cluster to add new node:-
+An inventory should look like this to add new node in existing galera cluster:-
 ```ini
 [master]                 
 192.168.1.198    ansible_user=ubuntu    node_name=Node1
